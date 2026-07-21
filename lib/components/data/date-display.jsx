@@ -44,21 +44,6 @@ export const Widget = React.memo(() => {
   const [state, setState] = React.useState();
   const [loading, setLoading] = React.useState(visible);
 
-  const formatOptions = shortDateFormat ? "short" : "long";
-
-  // Memoize the date format options
-  const options = React.useMemo(
-    () => ({
-      weekday: formatOptions,
-      month: formatOptions,
-      day: "numeric",
-    }),
-    [formatOptions],
-  );
-
-  // Ensure locale is valid, default to "en-UK" if not
-  const _locale = locale.length > 4 ? locale : "en-UK";
-
   /**
    * Reset the widget state.
    */
@@ -72,10 +57,21 @@ export const Widget = React.memo(() => {
    */
   const getDate = React.useCallback(() => {
     if (!visible) return;
-    const now = new Date().toLocaleDateString(_locale, options);
+    const d = new Date();
+    const resolvedLocale = resolveLocale(locale);
+    const now = shortDateFormat
+      ? `${d.getMonth() + 1}/${d.getDate()} (${d.toLocaleDateString(
+          resolvedLocale,
+          { weekday: "short" },
+        )})`
+      : d.toLocaleDateString(resolvedLocale, {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+        });
     setState({ now });
     setLoading(false);
-  }, [_locale, options, visible]);
+  }, [visible, locale, shortDateFormat]);
 
   // Use server socket to get date updates
   useServerSocket("date-display", visible, getDate, resetWidget, setLoading);
@@ -115,4 +111,22 @@ Widget.displayName = "DateDisplay";
 function openCalendarApp(calendarApp) {
   const appName = calendarApp || "Calendar";
   Uebersicht.run(`open -a "${appName}"`);
+}
+
+/**
+ * Resolve a usable locale, falling back to ko-KR when the provided locale is
+ * empty, malformed, or unsupported by the runtime Intl implementation.
+ * @param {string} locale - The configured locale tag.
+ * @returns {string} A supported locale tag, or "ko-KR" as a fallback.
+ */
+function resolveLocale(locale) {
+  const candidate = locale?.trim();
+  if (!candidate) return "ko-KR";
+  try {
+    return Intl.DateTimeFormat.supportedLocalesOf([candidate]).length
+      ? candidate
+      : "ko-KR";
+  } catch {
+    return "ko-KR";
+  }
 }

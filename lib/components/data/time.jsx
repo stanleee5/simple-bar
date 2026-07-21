@@ -27,6 +27,7 @@ export const Widget = React.memo(() => {
     showSeconds,
     showOnDisplay,
     showIcon,
+    clockApp,
   } = timeWidgetOptions;
 
   // Determine if the widget should be visible on the current display
@@ -98,10 +99,20 @@ export const Widget = React.memo(() => {
     return <Icon time={time} />;
   };
 
+  /**
+   * Handle click event to open the clock application.
+   * @param {Event} e - The click event.
+   */
+  const onClick = (e) => {
+    Utils.clickEffect(e);
+    openClockApp(clockApp);
+  };
+
   return (
     <DataWidget.Widget
       classes="time"
       Icon={showIcon ? TimeIcon : null}
+      onClick={onClick}
       disableSlider
     >
       {time}
@@ -116,6 +127,24 @@ export const Widget = React.memo(() => {
 });
 
 Widget.displayName = "Time";
+
+/**
+ * Open the specified clock application.
+ * @param {string} clockApp - The name of the clock application to open.
+ */
+function openClockApp(clockApp) {
+  const appName = clockApp || "Clock";
+  Uebersicht.run(`open -a ${shellQuote(appName)}`);
+}
+
+/**
+ * Quotes a value as one POSIX shell argument.
+ * @param {string} value - The value to quote.
+ * @returns {string} A safely quoted shell argument.
+ */
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, `'"'"'`)}'`;
+}
 
 /**
  * Icon component for displaying the time as a clock.

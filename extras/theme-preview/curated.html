@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+</head>
+<body>
+<title>simple-bar 테마 미리보기</title>
+<style>
+  :root {
+    --ground: #eef0f4;
+    --surface: #ffffff;
+    --ink: #1f242b;
+    --muted: #5b6572;
+    --line: #d9dee6;
+    --accent: #3e6b8f;
+    --accent-ink: #ffffff;
+    --chip-dark-bg: #2b303a;
+    --chip-dark-ink: #cfd6e0;
+    --chip-light-bg: #e4e8ee;
+    --chip-light-ink: #4a5462;
+    --desk-dark-a: #2a2e36;
+    --desk-dark-b: #1b1e24;
+    --desk-light-a: #dde1e7;
+    --desk-light-b: #c9cfd8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #131519;
+      --surface: #1c1f25;
+      --ink: #e7eaee;
+      --muted: #98a1ad;
+      --line: #2c313a;
+      --accent: #7fa8c9;
+      --accent-ink: #10161c;
+      --chip-dark-bg: #262b34;
+      --chip-dark-ink: #aeb7c4;
+      --chip-light-bg: #d7dce4;
+      --chip-light-ink: #39414d;
+    }
+  }
+  :root[data-theme="light"] {
+    --ground: #eef0f4; --surface: #ffffff; --ink: #1f242b; --muted: #5b6572;
+    --line: #d9dee6; --accent: #3e6b8f; --accent-ink: #ffffff;
+    --chip-dark-bg: #2b303a; --chip-dark-ink: #cfd6e0;
+    --chip-light-bg: #e4e8ee; --chip-light-ink: #4a5462;
+  }
+  :root[data-theme="dark"] {
+    --ground: #131519; --surface: #1c1f25; --ink: #e7eaee; --muted: #98a1ad;
+    --line: #2c313a; --accent: #7fa8c9; --accent-ink: #10161c;
+    --chip-dark-bg: #262b34; --chip-dark-ink: #aeb7c4;
+    --chip-light-bg: #d7dce4; --chip-light-ink: #39414d;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  }
+  .mono { font-family: "JetBrains Mono", ui-monospace, Menlo, Monaco, monospace; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--ground) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .head-inner {
+    max-width: 1060px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  h1 { font-size: 17px; font-weight: 650; margin: 0; letter-spacing: -0.01em; }
+  h1 small { font-weight: 450; color: var(--muted); margin-left: 8px; font-size: 13px; }
+  .controls { display: flex; gap: 8px; margin-left: auto; align-items: center; flex-wrap: wrap; }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+  .seg button {
+    border: 0; background: transparent; color: var(--muted);
+    font: 500 13px/1 inherit; font-family: inherit; padding: 7px 13px; cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .seg button:focus-visible, .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  label.toggle { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); cursor: pointer; }
+  label.toggle input { accent-color: var(--accent); }
+
+  main { max-width: 1060px; margin: 0 auto; padding: 22px 24px 64px; }
+  .hint { color: var(--muted); font-size: 13.5px; margin: 0 0 20px; }
+  .hint code {
+    font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-size: 12px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 1.5px 6px;
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 18px 18px; margin-bottom: 14px;
+  }
+  .card.hidden { display: none; }
+  .card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .t-name { font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
+  .kind {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 20px;
+  }
+  .kind.dark  { background: var(--chip-dark-bg);  color: var(--chip-dark-ink); }
+  .kind.light { background: var(--chip-light-bg); color: var(--chip-light-ink); }
+  .current {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+    padding: 3px 8px; border-radius: 20px;
+    background: var(--accent); color: var(--accent-ink);
+  }
+  .copy {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line); background: transparent; color: var(--muted);
+    border-radius: 7px; padding: 5px 10px; cursor: pointer;
+    font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-size: 12px;
+  }
+  .copy:hover { border-color: var(--accent); color: var(--ink); }
+  .copy.done { border-color: var(--accent); color: var(--accent); }
+
+  .swatches { display: flex; gap: 4px; margin-bottom: 12px; }
+  .sw { width: 22px; height: 14px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(128,128,128,0.25); }
+
+  .desk { border-radius: 9px; padding: 14px 14px 26px; overflow-x: auto; }
+  .desk.dark  { background: linear-gradient(135deg, var(--desk-dark-a),  var(--desk-dark-b)); }
+  .desk.light { background: linear-gradient(135deg, var(--desk-light-a), var(--desk-light-b)); }
+
+  .bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    min-width: 780px; height: 34px; padding: 0 5px;
+    font-family: "JetBrains Mono", ui-monospace, Menlo, Monaco, monospace;
+    font-size: 11px;
+  }
+  body.compact .bar { height: 28px; font-size: 10px; }
+  .bar .side { display: flex; align-items: center; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 7px; margin-left: 5px; white-space: nowrap; line-height: 1.4;
+  }
+  body.compact .pill { padding: 2px 6px; }
+  .appdot { display: inline-block; width: 9px; height: 9px; border-radius: 2.5px; opacity: 0.75; }
+</style>
+
+<header>
+  <div class="head-inner">
+    <h1>simple-bar 테마 미리보기<small id="count"></small></h1>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="테마 종류 필터">
+        <button data-filter="all" aria-pressed="true">전체</button>
+        <button data-filter="dark" aria-pressed="false">Dark</button>
+        <button data-filter="light" aria-pressed="false">Light</button>
+      </div>
+      <label class="toggle"><input type="checkbox" id="compact"> Compact (28px)</label>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p class="hint">
+    각 미리보기는 현재 켜져 있는 위젯 구성(spaces · process · music · sound · wifi · battery · weather · date · time)을
+    해당 테마의 실제 색상 규칙으로 재현한 것입니다. 오른쪽 버튼을 누르면 설정값이 복사됩니다 —
+    <code>~/.simplebarrc</code>의 <code>themes.lightTheme</code> / <code>themes.darkTheme</code>에 붙여넣으면 적용됩니다
+    (바에서 ⌘ , 설정 패널로도 변경 가능).
+  </p>
+  <div id="list"></div>
+</main>
+
+<script>
+  const THEMES = {"amarena":{"name":"Amarena","kind":"dark","main":"#1a2026","mainAlt":"#526170","minor":"#242d35","red":"#f26190","green":"#fb6396","yellow":"#f92d72","orange":"#c269bc","blue":"#4cb9d6","magenta":"#58d6bf","cyan":"#6ccb6e","foreground":"#f4f5f2","barRadius":"3px","itemRadius":"3px"},"catppuccin-frappe":{"name":"Catppuccin Frappe","kind":"dark","main":"#303446","mainAlt":"#292c3c","minor":"#232634","red":"#e78284","green":"#a6d189","yellow":"#e5c890","orange":"#ef9f76","blue":"#8caaee","magenta":"#ca9ee6","cyan":"#99d1db","foreground":"#c6d0f5","barRadius":"3px","itemRadius":"2px"},"catppuccin-latte":{"name":"Catppuccin Latte","kind":"light","main":"#eff1f5","mainAlt":"#e6e9ef","minor":"#dce0e8","red":"#d20f39","green":"#40a02b","yellow":"#df8e1d","orange":"#fe640b","blue":"#1e66f5","magenta":"#8839ef","cyan":"#04a5e5","foreground":"#4c4f69","barRadius":"3px","itemRadius":"2px"},"catppuccin-macchiato":{"name":"Catppuccin Macchiato","kind":"dark","main":"#24273a","mainAlt":"#1e2030","minor":"#181926","red":"#ed8796","green":"#a6da95","yellow":"#eed49f","orange":"#f5a97f","blue":"#8aadf4","magenta":"#c6a0f6","cyan":"#91d7e3","foreground":"#cad3f5","barRadius":"3px","itemRadius":"2px"},"catppuccin-mocha":{"name":"Catppuccin Mocha","kind":"dark","main":"#1e1e2e","mainAlt":"#181825","minor":"#11111b","red":"#f38ba8","green":"#a6e3a1","yellow":"#f9e2af","orange":"#fab387","blue":"#89b4fa","magenta":"#cba6f7","cyan":"#89dceb","foreground":"#cdd6f4","barRadius":"3px","itemRadius":"2px"},"catppuccin":{"name":"Catppuccin (old)","kind":"dark","main":"#1E1E2E","mainAlt":"#302D41","minor":"#575268","red":"#F28FAD","green":"#ABE9B3","yellow":"#FAE3B0","orange":"#F8BD96","blue":"#96CDFB","magenta":"#DDB6F2","cyan":"#89DCEB","foreground":"#D9E0EE","barRadius":"3px","itemRadius":"2px"},"cisco":{"name":"Cisco","kind":"dark","main":"#282a36","mainAlt":"#8E2F91","minor":"#543185","red":"#8E2F91","green":"#8E2F91","yellow":"#BE3161","orange":"#008CD1","blue":"#6E5BC2","magenta":"#8E2F91","cyan":"#CC60CB","foreground":"#9E70B5","barRadius":"3px","itemRadius":"2px"},"cyberdream-dark":{"name":"Cyberdream Dark","kind":"dark","main":"rgba(22, 24, 26, 0.6)","mainAlt":"rgba(30, 33, 36, 0.6)","minor":"rgba(60, 64, 72, 0.6)","red":"#ff6e5e","green":"#5eff6c","yellow":"#f1ff5e","orange":"#ffbd5e","blue":"#5ea1ff","magenta":"#ff5ef1","cyan":"#5ef1ff","foreground":"#ffffff","barRadius":"3px","itemRadius":"2px"},"cyberdream-light":{"name":"Cyberdream Light","kind":"light","main":"rgba(255, 255, 255, 0.6)","mainAlt":"rgba(234, 234, 234, 0.6)","minor":"rgba(172, 172, 172, 0.6)","red":"#d11500","green":"#008b0c","yellow":"#997b00","orange":"#d17c00","blue":"#0057d1","magenta":"#d100bf","cyan":"#008c99","foreground":"#16181a","barRadius":"3px","itemRadius":"2px"},"dracula":{"name":"Dracula","kind":"dark","main":"#282a36","mainAlt":"#ff79c6","minor":"#44475a","red":"#ff5555","green":"#50fa7b","yellow":"#f1fa8c","orange":"#ffb86c","blue":"#bd93f9","magenta":"#ff79c6","cyan":"#8be9fd","foreground":"#f8f8f2","barRadius":"3px","itemRadius":"2px"},"everforest-dark":{"name":"Everforest Dark","kind":"dark","main":"#2d353b","mainAlt":"#232a2e","minor":"#475258","red":"#e67e80","green":"#a7c080","yellow":"#dbbc7f","orange":"#e69875","blue":"#7fbbb3","magenta":"#d699b6","cyan":"#83c092","foreground":"#d3c6aa","barRadius":"4px","itemRadius":"3px"},"everforest-light":{"name":"Everforest Light","kind":"light","main":"#fdf6e3","mainAlt":"#f4f0d9","minor":"#e6e2cc","red":"#f85552","green":"#8da101","yellow":"#dfa000","orange":"#f57d26","blue":"#3a94c5","magenta":"#df69ba","cyan":"#35a77c","foreground":"#5c6a72","barRadius":"4px","itemRadius":"3px"},"gruvbox-dark":{"name":"Gruvbox Dark","kind":"dark","main":"#282828","mainAlt":"#ff0000","minor":"#3c3836","red":"#cc241d","green":"#98971a","yellow":"#d79921","orange":"#d65d0e","blue":"#458588","magenta":"#b16286","cyan":"#689d6a","foreground":"#ebdbb2","barRadius":"3px","itemRadius":"2px"},"gruvbox-light":{"name":"Gruvbox Light","kind":"light","main":"#fbf1c7","mainAlt":"#7c6f64","minor":"#ebdbb2","red":"#cc241d","green":"#98971a","yellow":"#d79921","orange":"#d65d0e","blue":"#458588","magenta":"#b16286","cyan":"#689d6a","foreground":"#3c3836","barRadius":"3px","itemRadius":"2px"},"gruvbox-material":{"name":"Gruvbox Material","kind":"dark","main":"#282828","mainAlt":"#ea6962","minor":"#32302f","red":"#ea6962","green":"#a9b665","yellow":"#e3a84e","orange":"#e78a4e","blue":"#7daea3","magenta":"#d3869b","cyan":"#89b482","foreground":"#dfbf8e","barRadius":"8px","itemRadius":"6px"},"mac-os-dark":{"name":"Mac OS Dark","kind":"dark","main":"#292a2b","mainAlt":"#5f5f60","minor":"#3c3d3e","red":"#ee5f5c","green":"#77b756","yellow":"#f8c644","orange":"#ca8739","blue":"#2b7bf7","magenta":"#9b57a2","cyan":"#e65d9c","foreground":"#fff","barRadius":"16px","itemRadius":"14px"},"mac-os-light":{"name":"Mac OS Light","kind":"light","main":"#ececed","mainAlt":"#5f5f60","minor":"#fff","red":"#ee5f5c","green":"#77b756","yellow":"#f8c644","orange":"#ca8739","blue":"#2b7bf7","magenta":"#9b57a2","cyan":"#e65d9c","foreground":"#292a2b","barRadius":"16px","itemRadius":"14px"},"material-ocean":{"name":"Material Theme - Ocean","kind":"dark","main":"rgb(15, 17, 26)","mainAlt":"#0F111A","minor":"#3c3d3e","red":"#f07178","green":"#C3E88D","yellow":"#FFCB6B","orange":"#F78C6C","blue":"#82AAFF","magenta":"#C792EA","cyan":"#89DDFF","foreground":"#A6ACCD","barRadius":"16px","itemRadius":"14px"},"midsummer-night-dark":{"name":"Midsummer Night Dark","kind":"dark","main":"#1c1e27","mainAlt":"#212831","minor":"#212831","red":"#e43d6a","green":"#0af29d","yellow":"#eea585","orange":"#e88376","blue":"#56c2ea","magenta":"#b468d0","cyan":"#00ccbb","foreground":"#fff","barRadius":"3px","itemRadius":"2px"},"night-owl":{"name":"NightOwl","kind":"dark","main":"#011627","mainAlt":"#0b253a","minor":"#084d8180","red":"#ef5350","green":"#22da6e","yellow":"#FFCA28","orange":"#F78C6C","blue":"#82AAFF","magenta":"#C792EA","cyan":"#7fdbca","foreground":"#d2dee7","barRadius":"3px","itemRadius":"2px"},"night-shift-dark":{"name":"Night Shift Dark","kind":"dark","main":"#1b222d","mainAlt":"#98a8c5","minor":"#39465e","red":"#e78482","green":"#8fc8BB","yellow":"#ffd484","orange":"#ffb374","blue":"#6db3cE","magenta":"#ad82cB","cyan":"#7eddde","foreground":"#fff","barRadius":"6px","itemRadius":"5px"},"night-shift-light":{"name":"Night Shift Light","kind":"light","main":"#fff","mainAlt":"#98a8c5","minor":"#f5f5f5","red":"#e78482","green":"#8fc8bb","yellow":"#d1ab66","orange":"#ffb374","blue":"#6db3ce","magenta":"#ad82cb","cyan":"#2fc2c3","foreground":"#1b222d","barRadius":"6px","itemRadius":"5px"},"nightfox-dark":{"name":"Nightfox Dark","kind":"dark","main":"#192330","mainAlt":"#131a24","minor":"#29394f","red":"#c94f6d","green":"#81b29a","yellow":"#dbc074","orange":"#f4a261","blue":"#719cd6","magenta":"#9d79d6","cyan":"#63cdcf","foreground":"#cdcecf","barRadius":"7px","itemRadius":"5px"},"nightfox-light":{"name":"Nightfox Light","kind":"light","main":"#f6f2ee","mainAlt":"#e4dcd4","minor":"#d3c7bb","red":"#a5222f","green":"#396847","yellow":"#AC5402","orange":"#955f61","blue":"#2848a9","magenta":"#6e33ce","cyan":"#287980","foreground":"#3d2b5a","barRadius":"7px","itemRadius":"5px"},"nord":{"name":"Nord","kind":"dark","main":"#3b4252","mainAlt":"#eceef4","minor":"#4c566a","red":"#bf616a","green":"#a3be8c","yellow":"#ebcb8b","orange":"#d08770","blue":"#81a1c1","magenta":"#b48ead","cyan":"#88c0d0","foreground":"#d8dee9","barRadius":"16px","itemRadius":"14px"},"one-dark":{"name":"One Dark","kind":"dark","main":"#21252b","mainAlt":"#e6e6e6","minor":"#323842","red":"#e05561","green":"#8cc265","yellow":"#d18f52","orange":"#ffb374","blue":"#6db3ce","magenta":"#c162de","cyan":"#42b3c2","foreground":"#abb2bf","barRadius":"16px","itemRadius":"20px"},"one-light":{"name":"One Light","kind":"light","main":"#f5f5f5","mainAlt":"#21252b","minor":"#fff","red":"#e05561","green":"#8cc265","yellow":"#d18f52","orange":"#FFB374","blue":"#6DB3CE","magenta":"#c162de","cyan":"#42b3c2","foreground":"#21252b","barRadius":"16px","itemRadius":"20px"},"rose-pine-dawn":{"name":"Ros\u00e9 Pine Dawn","kind":"light","main":"#faf4ed","mainAlt":"#fffaf3","minor":"#f2e9e1","red":"#b4637a","green":"#286983","yellow":"#ea9d34","orange":"#d7827e","blue":"#56949f","magenta":"#907aa9","cyan":"#d7827e","foreground":"#575279","barRadius":"3px","itemRadius":"2px"},"rose-pine-moon":{"name":"Ros\u00e9 Pine Moon","kind":"dark","main":"#232136","mainAlt":"#2a273f","minor":"#393552","red":"#eb6f92","green":"#3e8fb0","yellow":"#f6c177","orange":"#ea9a97","blue":"#9ccfd8","magenta":"#c4a7e7","cyan":"#ea9a97","foreground":"#e0def4","barRadius":"3px","itemRadius":"2px"},"rose-pine":{"name":"Ros\u00e9 Pine","kind":"dark","main":"#191724","mainAlt":"#1f1d2e","minor":"#26233a","red":"#eb6f92","green":"#31748f","yellow":"#f6c177","orange":"#ebbcba","blue":"#9ccfd8","magenta":"#c4a7e7","cyan":"#ebbcba","foreground":"#e0def4","barRadius":"3px","itemRadius":"2px"},"solarized-dark":{"name":"Solarized Dark","kind":"dark","main":"#002b36","mainAlt":"#002b36","minor":"#073642","red":"#dc322f","green":"#859900","yellow":"#b58900","orange":"#cb4b16","blue":"#0087ff","magenta":"#d33682","cyan":"#2aa198","foreground":"#93a1a1","barRadius":"16px","itemRadius":"20px"},"solarized-light":{"name":"Solarized Light","kind":"light","main":"#fdf6e3","mainAlt":"#fdf6e3","minor":"#eee8d5","red":"#dc322f","green":"#859900","yellow":"#b58900","orange":"#cb4b16","blue":"#0087ff","magenta":"#d33682","cyan":"#2aa198","foreground":"#657b83","barRadius":"16px","itemRadius":"20px"},"spaceduck":{"name":"SpaceDuck","kind":"dark","main":"#0f111b","mainAlt":"#b3a1e6","minor":"#1b1c36","red":"#e33400","green":"#5ccc96","yellow":"#f2ce00","orange":"#e39400","blue":"#686f9a","magenta":"#ce6f8f","cyan":"#00a3cc","foreground":"#ecf0c1","barRadius":"3px","itemRadius":"3px"},"sylens":{"name":"Sylens","kind":"dark","main":"#1B2229","mainAlt":"#7d5a15","minor":"#1b2229","red":"#7d5a15","green":"#BF6832","yellow":"#d65d0e","orange":"#475090","blue":"#33736A","magenta":"#814b42","cyan":"#346a97","foreground":"#a77822","barRadius":"3px","itemRadius":"2px"},"tokyo-night":{"name":"Tokyo Night","kind":"dark","main":"#15161E","mainAlt":"#302D41","minor":"#15161E","red":"#F7768E","green":"#9ECE6A","yellow":"#E0AF68","orange":"#F8BD96","blue":"#7AA2F7","magenta":"#BB9AF7","cyan":"#7DCFFF","foreground":"#A9B1D6","barRadius":"9px","itemRadius":"5px"},"vscode-dark-modern":{"name":"Vscode Dark Modern","kind":"dark","main":"#181818","mainAlt":"#1f1f1f","minor":"#2a2a2a","red":"#e78482","green":"#4ec6ae","yellow":"#dcdcaa","orange":"#ffb374","blue":"#4fc1ff","magenta":"#c586c0","cyan":"#9cdcfe","foreground":"#fff","barRadius":"3px","itemRadius":"7px"}};
+  const CURRENT = ["NightShiftLight", "NightShiftDark"];
+
+  const configName = (name) => name.replace(/[^a-zA-Z0-9]/g, "");
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  function pill(bg, fg, text, extraStyle = "", radius = "") {
+    return `<span class="pill" style="background:${bg};color:${fg};border-radius:${radius};${extraStyle}">${text}</span>`;
+  }
+
+  function barHTML(t) {
+    const r = t.itemRadius || "4px";
+    const dot = `<span class="appdot" style="background:${t.foreground}"></span>`;
+    // spaces: 첫 번째가 포커스된 space (bg=foreground, text=minor)
+    const spaces =
+      pill(t.foreground, t.minor, "1", "font-weight:700", r) +
+      pill(t.minor, t.foreground, `2 ${dot}${dot}`, "", r) +
+      pill(t.minor, t.foreground, `3 ${dot}`, "", r) +
+      pill(t.minor, t.foreground, "4", "", r);
+    const process = pill(t.minor, t.foreground, "&#xFF5E; Ghostty", "opacity:0.95", r);
+    const right =
+      pill(t.green,  t.main, "&#9835; NewJeans &#8211; ETA", "", r) +
+      pill(t.blue,   t.main, "&#9836; 45%", "", r) +
+      pill(t.red,    t.main, "&#9776; Wi-Fi", "", r) +
+      pill(t.magenta,t.main, "&#9646; 87%", "", r) +
+      pill(t.minor,  t.foreground, "Magok, 27&deg;C", "", r) +
+      pill(t.cyan,   t.main, "Sun 6 Jul", "", r) +
+      pill(t.yellow, t.main, "14:32", "", r);
+    return `<div class="bar" style="background:${t.main};border-radius:${t.barRadius || "4px"}">
+      <div class="side">${spaces}${process}</div>
+      <div class="side">${right}</div>
+    </div>`;
+  }
+
+  function card(slug, t) {
+    const cfg = configName(t.name);
+    const isCurrent = CURRENT.includes(cfg);
+    const swatchKeys = ["main", "mainAlt", "minor", "red", "green", "yellow", "orange", "blue", "magenta", "cyan", "foreground"];
+    const swatches = swatchKeys
+      .map((k) => `<span class="sw" style="background:${t[k]}" title="${k}: ${t[k]}"></span>`)
+      .join("");
+    return `<section class="card" data-kind="${t.kind}">
+      <div class="card-head">
+        <span class="t-name">${esc(t.name)}</span>
+        <span class="kind ${t.kind}">${t.kind}</span>
+        ${isCurrent ? '<span class="current">현재 사용 중</span>' : ""}
+        <button class="copy" data-cfg="${cfg}" title='"${cfg}" 복사'>${cfg} &#x2398;</button>
+      </div>
+      <div class="swatches">${swatches}</div>
+      <div class="desk ${t.kind}">${barHTML(t)}</div>
+    </section>`;
+  }
+
+  const list = document.getElementById("list");
+  list.innerHTML = Object.entries(THEMES).map(([slug, t]) => card(slug, t)).join("");
+
+  const cards = [...document.querySelectorAll(".card")];
+  const countEl = document.getElementById("count");
+  const updateCount = () => {
+    const n = cards.filter((c) => !c.classList.contains("hidden")).length;
+    countEl.textContent = `${n}개 테마`;
+  };
+
+  document.querySelectorAll(".seg button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", b === btn));
+      const f = btn.dataset.filter;
+      cards.forEach((c) => c.classList.toggle("hidden", f !== "all" && c.dataset.kind !== f));
+      updateCount();
+    });
+  });
+  updateCount();
+
+  document.getElementById("compact").addEventListener("change", (e) => {
+    document.body.classList.toggle("compact", e.target.checked);
+  });
+
+  list.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".copy");
+    if (!btn) return;
+    try {
+      await navigator.clipboard.writeText(btn.dataset.cfg);
+      const orig = btn.innerHTML;
+      btn.classList.add("done");
+      btn.innerHTML = "복사됨 &#x2713;";
+      setTimeout(() => { btn.classList.remove("done"); btn.innerHTML = orig; }, 1400);
+    } catch {}
+  });
+</script>
+
+</body>
+</html>

@@ -85,17 +85,24 @@ const {
   aerospacePath = "/opt/homebrew/bin/aerospace",
   windowManager, // Window manager type (yabai or aerospace)
   shell, // Shell to use for commands
-  enableServer, // Enable server mode
-  yabaiServerRefresh, // Refresh rate for yabai server
 } = settings.global;
 const { hideWindowTitle, displayOnlyIcon, displaySkhdMode } = settings.process;
 
 // Determine if signals should be disabled based on settings
-const disableSignals = enableServer && yabaiServerRefresh;
+// MACHINE-SPECIFIC (unfixed): upstream computes this as `enableServer &&
+// yabaiServerRefresh`. Forcing it true assumes simple-bar-server is always
+// running to push refreshes; on a machine without that server the bar would
+// stop reacting to yabai events entirely.
+const disableSignals = true;
 const enableTitleChangedSignal = !hideWindowTitle && !displayOnlyIcon;
+// MACHINE-SPECIFIC (unfixed): "/opt/homebrew" is the Apple Silicon Homebrew
+// prefix — Intel Macs install to /usr/local/bin. This only rewrites the literal
+// "$(which yabai)" default, which Übersicht's shell cannot expand, because its
+// PATH lacks Homebrew; a real configured yabaiPath still wins.
+const resolvedYabaiPath = yabaiPath === "$(which yabai)" ? "/opt/homebrew/bin/yabai" : yabaiPath;
 
 // Construct command arguments based on window manager type
-const yabaiArgs = `${yabaiPath} ${displaySkhdMode} ${disableSignals} ${enableTitleChangedSignal}`;
+const yabaiArgs = `${resolvedYabaiPath} ${displaySkhdMode} ${disableSignals} ${enableTitleChangedSignal}`;
 const aerospaceArgs = `${aerospacePath}`;
 const args = getArguments(windowManager, yabaiArgs, aerospaceArgs);
 const command = `${shell} simple-bar/lib/scripts/init-${windowManager}.sh ${args}`;

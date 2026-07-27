@@ -22,6 +22,7 @@ const settingsKeys = {
   nextMeetingWidget: "nextMeetingWidgetOptions",
   notificationsWidget: "notificationsWidgetOptions",
   soundWidget: "soundWidgetOptions",
+  bluetoothWidget: "bluetoothWidgetOptions",
   spotifyWidget: "spotifyWidgetOptions",
   stockWidget: "stockWidgetOptions",
   timeWidget: "timeWidgetOptions",

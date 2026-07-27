@@ -19,6 +19,7 @@ import * as Gpu from "./lib/components/data/gpu.jsx";
 import * as Memory from "./lib/components/data/memory.jsx";
 import * as Battery from "./lib/components/data/battery.jsx";
 import * as Sound from "./lib/components/data/sound.jsx";
+import * as Bluetooth from "./lib/components/data/bluetooth.jsx";
 import * as Mic from "./lib/components/data/mic.jsx";
 import * as Wifi from "./lib/components/data/wifi.jsx";
 import * as ViscosityVPN from "./lib/components/data/viscosity-vpn.jsx";
@@ -125,6 +126,7 @@ Utils.injectStyles("simple-bar-index-styles", [
   Keyboard.styles,
   Mic.styles,
   Sound.styles,
+  Bluetooth.styles,
   Spotify.styles,
   YouTubeMusic.styles,
   Music.styles,
@@ -241,6 +243,7 @@ function render({ output, error }) {
           <Notifications.Widget />
           <NextMeeting.Widget />
           <Mic.Widget />
+          <Bluetooth.Widget />
           <Sound.Widget />
           <ViscosityVPN.Widget />
           <Wifi.Widget />

@@ -1,10 +1,15 @@
 # <img src="./images/logo-simple-bar.png" width="200" alt="simple-bar" />
 
+> This fork packages the local macOS setup used in this repository: additional
+> themes, a Bluetooth device widget, YouTube Music and yabai fixes, VPN-aware
+> weather lookup, and optional theme-preview helpers. The upstream project is
+> [Jean-Tinland/simple-bar](https://github.com/Jean-Tinland/simple-bar).
+
 A [yabai](https://github.com/koekeishiya/yabai) or [AeroSpace](https://github.com/nikitabobko/AeroSpace) status bar widget for [Übersicht](https://github.com/felixhageloh/uebersicht) inspired by [nibar](https://github.com/kkga/nibar), [yabar](https://github.com/AlexNaga/yabar) and [this reddit post](https://www.reddit.com/r/unixporn/comments/chwk89/yabai_yabai_and_gruvbox_with_custom_ubersicht_bar/).
 
 [Website](https://www.jeantinland.com/toolbox/simple-bar) • [Documentation](https://www.jeantinland.com/toolbox/simple-bar/documentation)
 
-[`simple-bar-server`](https://github.com/Jean-Tinland/simple-bar-server) is available to trigger refresh and toggle widgets more efficiently with `curl` commands.
+[`simple-bar-server`](https://github.com/Jean-Tinland/simple-bar-server) triggers refresh and toggles widgets with `curl` commands. It is optional upstream, but **required by this fork** — see [Quick install](#quick-install).
 
 A more "lite" & basic version is available [here](https://github.com/Jean-Tinland/simple-bar-lite).
 
@@ -19,7 +24,7 @@ Among the principal features of `simple-bar`, you'll find:
 - Interactions: **focus window** on click, launch scripts, toggle states
 - **Multi-monitor support**: enable individual widget on specific displays
 - Add your own custom widgets in settings (it displays scripts outputs)
-- **Refresh and toggle parts of simple-bar on the fly** with `curl` commands by installing [simple-bar-server](https://www.jeantinland.com/toolbox/simple-bar-server/documentation/introduction/) and enabling the server in settings. See [widgets](https://www.jeantinland.com/toolbox/simple-bar-server/documentation/widgets/), [yabai](https://www.jeantinland.com/toolbox/simple-bar-server/documentation/yabai/) or [AeroSpace](https://www.jeantinland.com/toolbox/simple-bar-server/documentation/aerospace/) options in its documentation
+- **Refresh and toggle parts of simple-bar on the fly** with `curl` commands via [simple-bar-server](https://www.jeantinland.com/toolbox/simple-bar-server/documentation/introduction/), which this fork requires (see [Quick install](#quick-install)). See [widgets](https://www.jeantinland.com/toolbox/simple-bar-server/documentation/widgets/), [yabai](https://www.jeantinland.com/toolbox/simple-bar-server/documentation/yabai/) or [AeroSpace](https://www.jeantinland.com/toolbox/simple-bar-server/documentation/aerospace/) options in its documentation
 - **Extensible** themes system with 3 theme behaviors: **dark**, **light**, or **system**
 - Numerous customization options, try them out in settings!
 - A handfull selection of widgets
@@ -35,13 +40,85 @@ Among the principal features of `simple-bar`, you'll find:
 
 ## Installation
 
-Simply clone this repo in your Übersicht widgets directory with the following command.
+### Requirements
+
+- macOS and [Übersicht](https://github.com/felixhageloh/uebersicht)
+- [yabai](https://github.com/koekeishiya/yabai) or
+  [AeroSpace](https://github.com/nikitabobko/AeroSpace)
+
+Node.js and `CoreLocationCLI` are only needed for the optional extras below.
+
+### Quick install
+
+Quit Übersicht if it is already running, then clone this fork into its widget
+directory. If a previous installation occupies that directory, move it aside
+first (`mv … …/simple-bar.backup`) to preserve its working tree.
 
 ```bash
-git clone --depth 1 https://github.com/Jean-Tinland/simple-bar $HOME/Library/Application\ Support/Übersicht/widgets/simple-bar
+git clone --depth 1 https://github.com/stanleee5/simple-bar.git \
+  "$HOME/Library/Application Support/Übersicht/widgets/simple-bar"
+open -a "Übersicht"
 ```
 
-You'll find the full installation guide in the [documentation](https://www.jeantinland.com/toolbox/simple-bar/documentation/installation/).
+Then install
+[simple-bar-server](https://github.com/Jean-Tinland/simple-bar-server)
+following its official instructions, and turn on
+`Enable simple-bar-server connection` in simple-bar settings (click the bar,
+then press `cmd` + `,`).
+
+> [!IMPORTANT]\
+> Unlike upstream, this fork disables the osascript signal fallback and relies
+> on simple-bar-server for event-driven refresh. Without the server installed,
+> running, and enabled in settings, the bar will not react to space or window
+> changes.
+
+Finally, review the remaining settings (`cmd` + `,`): the yabai or AeroSpace
+binary path, the widget toggles, and the YouTube Music API port (default
+`26538`). The Bluetooth widget ships enabled with defaults in this fork's
+schema, so no hand-edited `~/.simplebarrc` is required. Settings persist in
+both Übersicht local storage and `~/.simplebarrc`.
+
+### Optional
+
+**Accurate weather location behind a VPN** — install
+[`CoreLocationCLI`](https://github.com/fulldecent/corelocationcli)
+(`brew install --cask corelocationcli`) and grant it Location Services access
+once when prompted. Without it, the weather widget falls back to IP
+geolocation, which a VPN skews toward the exit country.
+
+**Theme browser with one-click switching** (needs Node.js):
+
+```bash
+cd "$HOME/Library/Application Support/Übersicht/widgets/simple-bar"
+./scripts/install-extras.sh
+open extras/theme-preview/index.html
+```
+
+The installer puts the theme helper under
+`~/.local/share/simple-bar-theme-helper`, loads the
+`com.local.simple-bar-theme-helper` LaunchAgent (port `7778`), points the
+helper at the clone it was run from, and installs the display-recovery script
+described under Advanced.
+
+### Advanced & development
+
+- The widget itself needs no `npm install`. For linting or development:
+  `npm install && npm run lint` inside the widget directory.
+- `SIMPLE_BAR_DIR="/absolute/path/to/simple-bar" ./scripts/install-extras.sh`
+  when the clone is deliberately stored outside Übersicht's standard widget
+  directory.
+- `SIMPLE_BAR_SKIP_LAUNCHCTL=1 ./scripts/install-extras.sh` installs all files
+  without loading the LaunchAgent (packaging tests).
+- The display-recovery helper (`~/.local/bin/simple-bar-display-refresh.sh`)
+  is installed by `install-extras.sh` but not registered automatically; call
+  it from your own display-change automation. It refreshes simple-bar-server
+  on port `7776` (override with `SIMPLE_BAR_SERVER_PORT`) and relaunches
+  Übersicht.
+- This fork does not vendor simple-bar-server itself; it is a separately
+  maintained service.
+
+The full upstream installation guide remains available in the
+[simple-bar documentation](https://www.jeantinland.com/toolbox/simple-bar/documentation/installation/).
 
 > [!WARNING]\
 > If you encounter this error: "simple-bar-index.jsx: Something went wrong…", it may be simply due to the fact that the default value for yabai or AeroSpace path is wrong in simple-bar. You can set this path in the settings module.\
@@ -49,9 +126,6 @@ You'll find the full installation guide in the [documentation](https://www.jeant
 
 > [!NOTE]\
 > `simple-bar` is trying to use yabai by default. If you want to switch to AeroSpace, you'll need to open the settings module (simply click on `simple-bar` then press `cmd` + `,`). You'll find the window manager choice in the "Global" tab.
-
-> [!TIP]\
-> If you experience some freezing issues with Übersicht or if you simply want to improve `simple-bar` responsiveness & energy consumption, please try to switch to `simple-bar-server` in order to trigger refresh with `curl` commands. You'll find more information about it in the repo [here](https://github.com/Jean-Tinland/simple-bar-server).
 
 ## Roadmap
 

@@ -168,13 +168,21 @@ Widget.displayName = "Weather";
  * @returns {JSX.Element} - The weather icon component
  */
 function getIcon(description, atNight) {
-  if (description.includes("fog") || description.includes("mist")) {
+  // wttr.in capitalizes the first word, so a keyword leading the description
+  // ("Cloudy", "Rain") never matched these lowercase tests and fell through to
+  // Sun — only forms like "Partly cloudy" happened to work.
+  const condition = description.toLowerCase();
+  if (condition.includes("fog") || condition.includes("mist")) {
     return Icons.Fog;
   }
-  if (description.includes("storm")) return Icons.Storm;
-  if (description.includes("snow")) return Icons.Snow;
-  if (description.includes("rain")) return Icons.Rain;
-  if (description.includes("cloud")) return Icons.Cloud;
+  // wttr.in says "Thundery outbreaks possible", never "storm", for dry thunder.
+  if (condition.includes("storm") || condition.includes("thunder")) {
+    return Icons.Storm;
+  }
+  if (condition.includes("snow")) return Icons.Snow;
+  if (condition.includes("rain")) return Icons.Rain;
+  if (condition.includes("cloud")) return Icons.Cloud;
+  if (condition.includes("overcast")) return Icons.Cloud;
   if (atNight) return Icons.Moon;
   return Icons.Sun;
 }

@@ -28,6 +28,7 @@ export const Widget = React.memo(() => {
     hideGradient,
     showOnDisplay,
     showIcon,
+    weatherApp,
   } = weatherWidgetOptions;
 
   const refresh = React.useMemo(
@@ -44,6 +45,12 @@ export const Widget = React.memo(() => {
   const location = React.useRef(
     visible && customLocation.length ? customLocation : undefined,
   );
+  const detectedLocationName = React.useRef("");
+
+  React.useEffect(() => {
+    location.current = customLocation || undefined;
+    detectedLocationName.current = "";
+  }, [customLocation]);
 
   /**
    * Resets the widget state and loading status
@@ -58,25 +65,75 @@ export const Widget = React.memo(() => {
    */
   const getWeather = React.useCallback(async () => {
     if (!visible) return;
+    // navigator.geolocation and in-app fetch both go through the VPN tunnel
+    // and geolocate to the wrong country; resolve coordinates and fetch
+    // weather through the shell instead, which egresses directly
     if (!location.current) {
-      const position = await Promise.race([getPosition(), Utils.timeout(5000)]);
-      if (!position) await getWeather();
-      const { city, zip } = position?.address || {};
-      location.current = zip || city;
-      if (!location.current) return setLoading(false);
+      // CoreLocation gives the real physical location (GPS/Wi-Fi), so the
+      // VPN tunnel no longer skews it to the exit country. Falls back to the
+      // IP-based reverse geocode if CoreLocationCLI is missing or denied.
+      // MACHINE-SPECIFIC (unfixed): the CoreLocationCLI path is hardcoded to
+      // the Apple Silicon Homebrew prefix (Intel Macs use /usr/local/bin), and
+      // the binary must be installed and granted Location Services access. It
+      // is not configurable via settings the way yabaiPath is. Degrades
+      // gracefully — a missing binary just falls through to the IP lookup.
+      try {
+        const info = JSON.parse(
+          await Uebersicht.run(
+            `/opt/homebrew/bin/CoreLocationCLI --json 2>/dev/null | head -1`,
+          ),
+        );
+        const { latitude, longitude } = info || {};
+        location.current =
+          latitude && longitude ? `${latitude},${longitude}` : "";
+        detectedLocationName.current =
+          info?.subLocality || info?.locality || info?.administrativeArea || "";
+      } catch {
+        try {
+          const info = JSON.parse(
+            await Uebersicht.run(
+              `curl -s --max-time 5 https://api.bigdatacloud.net/data/reverse-geocode-client`,
+            ),
+          );
+          const { latitude, longitude } = info || {};
+          location.current =
+            latitude && longitude ? `${latitude},${longitude}` : "";
+          detectedLocationName.current =
+            info?.locality || info?.city || info?.principalSubdivision || "";
+        } catch {
+          location.current = "";
+          detectedLocationName.current = "";
+        }
+      }
     }
     try {
-      const result = await fetch(
-        `https://wttr.in/${location.current}?format=j1`,
+      // wttr.in intermittently 503s; a failed fetch leaves the widget
+      // hidden until the next 30-minute cycle, so let curl absorb
+      // transient errors instead
+      const weatherUrl = `https://wttr.in/${location.current}?format=j1`;
+      const raw = await Uebersicht.run(
+        `curl -s --connect-timeout 5 --max-time 30 --retry 3 --retry-all-errors ${shellQuote(weatherUrl)}`,
       );
-      const data = await result.json();
-      setState({ location: location.current, data });
+      const data = JSON.parse(raw);
+      const areaName = data?.nearest_area?.[0]?.areaName?.[0]?.value;
+      // wttr.in's nearest_area can be an obscure neighborhood (e.g.
+      // "Chongdong" for Seoul); prefer the user-chosen location name
+      setState({
+        location:
+          customLocation ||
+          detectedLocationName.current ||
+          areaName ||
+          location.current ||
+          "",
+        weatherLocation: location.current,
+        data,
+      });
     } catch  {
       // eslint-disable-next-line no-console
       console.error("Error while fetching weather")
     }
     setLoading(false);
-  }, [visible, location]);
+  }, [visible, location, customLocation]);
 
   useServerSocket("weather", visible, getWeather, resetWidget, setLoading);
   useWidgetRefresh(visible, getWeather, refresh);
@@ -144,12 +201,16 @@ export const Widget = React.memo(() => {
     "weather--sunset": sunSetting,
   });
 
+  const wttrUrl = `https://wttr.in/${
+    state.weatherLocation || state.location
+  }${wttrUnitParam}`;
+
   return (
     <DataWidget.Widget
       classes={classes}
       Icon={showIcon ? Icon : null}
-      href={`https://wttr.in/${state.location}${wttrUnitParam}`}
-      onClick={(e) => openWeather(e, pushMissive)}
+      onClick={(e) => openWeatherApp(e, weatherApp, pushMissive)}
+      onMiddleClick={(e) => openWttrIn(e, wttrUrl, pushMissive)}
       onRightClick={onRightClick}
       disableSlider
     >
@@ -202,21 +263,35 @@ function getLabel(location, temperature, unit, hideLocation) {
 }
 
 /**
- * Opens the weather forecast in a new tab
+ * Opens the weather application
  * @param {Event} e - The event object
+ * @param {string} weatherApp - The name of the weather application to open
  * @param {Function} pushMissive - Function to push notifications
  */
-function openWeather(e, pushMissive) {
+function openWeatherApp(e, weatherApp, pushMissive) {
   Utils.clickEffect(e);
-  Utils.notification("Opening forecast from wttr.in...", pushMissive);
+  const appName = weatherApp || "Weather";
+  Utils.notification(`Opening ${appName}...`, pushMissive);
+  Uebersicht.run(`open -a ${shellQuote(appName)}`);
 }
 
 /**
- * Gets the current geographical position of the user
- * @returns {Promise<GeolocationPosition>} - The position object
+ * Handles middle-click/cmd-click to open the wttr.in forecast in the browser
+ * @param {Event} e - The event object
+ * @param {string} url - The wttr.in forecast url
+ * @param {function} pushMissive - The missive push function
  */
-async function getPosition() {
-  return new Promise((resolve) =>
-    navigator.geolocation.getCurrentPosition(resolve),
-  );
+function openWttrIn(e, url, pushMissive) {
+  Utils.clickEffect(e);
+  Utils.notification("Opening forecast from wttr.in...", pushMissive);
+  Uebersicht.run(`open ${shellQuote(url)}`);
+}
+
+/**
+ * Quotes a value as one POSIX shell argument.
+ * @param {string} value - The value to quote.
+ * @returns {string} A safely quoted shell argument.
+ */
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, `'"'"'`)}'`;
 }

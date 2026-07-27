@@ -60,8 +60,12 @@ export const Widget = React.memo(() => {
         `ifconfig ${networkDevice} | grep status | cut -c 10-`,
         refresh,
       ),
+      // OS-VERSION-SPECIFIC (unfixed): replaces upstream's
+      // `system_profiler SPAirPortDataType`, which stopped reporting the SSID
+      // on recent macOS. `ipconfig getsummary` is undocumented and its output
+      // format is not guaranteed across releases — verified on macOS 26 Tahoe.
       Utils.cachedRun(
-        `system_profiler SPAirPortDataType | awk '/Current Network/ {getline;$1=$1;print $0 | "tr -d ':'";exit}'`,
+        `ipconfig getsummary ${networkDevice} | awk -F ' SSID : ' '/ SSID : / {print $2}'`,
         refresh,
       ),
     ]);

@@ -111,7 +111,9 @@ export const Widget = React.memo(() => {
     } catch {
       // most likely due to offline server, reset state
       resetWidget();
+      return;
     }
+    setLoading(false);
   }, [visible, fetchRoute]);
 
   // Use server socket to listen for updates

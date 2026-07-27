@@ -110,10 +110,35 @@ described under Advanced.
 - `SIMPLE_BAR_SKIP_LAUNCHCTL=1 ./scripts/install-extras.sh` installs all files
   without loading the LaunchAgent (packaging tests).
 - The display-recovery helper (`~/.local/bin/simple-bar-display-refresh.sh`)
-  is installed by `install-extras.sh` but not registered automatically; call
-  it from your own display-change automation. It refreshes simple-bar-server
-  on port `7776` (override with `SIMPLE_BAR_SERVER_PORT`) and relaunches
-  Übersicht.
+  is installed by `install-extras.sh` but not registered automatically. It
+  refreshes simple-bar-server on port `7776` (override with
+  `SIMPLE_BAR_SERVER_PORT`) and relaunches Übersicht, which is needed because
+  Übersicht 1.6 can lose its widget windows after a monitor is plugged in or
+  unplugged. Bind it to the topology events only:
+
+  ```sh
+  yabai -m signal --add event=display_added \
+    action="$HOME/.local/bin/simple-bar-display-refresh.sh" label="simple-bar-display_added"
+  yabai -m signal --add event=display_removed \
+    action="$HOME/.local/bin/simple-bar-display-refresh.sh" label="simple-bar-display_removed"
+  ```
+
+  Do **not** bind it to `display_changed`. That event fires when the *active*
+  display changes — every focus switch between monitors — so the helper would
+  kill and relaunch Übersicht several times a minute, and the bar would keep
+  dropping back to "Loading…". Use `display_changed` for a plain refresh
+  instead:
+
+  ```sh
+  SB="curl -s --max-time 1 http://localhost:7776/yabai"
+  yabai -m signal --add event=display_changed \
+    action="$SB/displays/refresh; $SB/spaces/refresh; $SB/windows/refresh" \
+    label="simple-bar-display_changed"
+  ```
+
+  As a safety net the helper skips the relaunch when the display count is
+  unchanged since its last run, so a misbinding degrades to a no-op rather
+  than a restart loop.
 - This fork does not vendor simple-bar-server itself; it is a separately
   maintained service.
 

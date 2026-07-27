@@ -36,7 +36,11 @@ history (`git log`); this page is the map.
 - **Extras** (`extras/`, `scripts/`): browser theme preview, a localhost
   helper (port `7778`) that applies themes by atomically rewriting
   `~/.simplebarrc`, its LaunchAgent installer, and a display-recovery
-  script.
+  script. The recovery script relaunches Übersicht, so it belongs on
+  yabai's `display_added` / `display_removed` signals — never on
+  `display_changed`, which fires on every focus switch between monitors.
+  It guards itself by skipping the relaunch when the display count has
+  not changed.
 
 ## Local policies (machine-specific, not for upstream)
 

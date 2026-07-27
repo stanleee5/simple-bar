@@ -132,6 +132,14 @@
           "type": "string",
           "description": "Dark theme to use"
         },
+        "_lightTheme": {
+          "type": "string",
+          "description": "Previously selected light theme"
+        },
+        "_darkTheme": {
+          "type": "string",
+          "description": "Previously selected dark theme"
+        },
         "colorMain": {
           "type": "string",
           "description": "Override the main color of the theme. Must be a valid CSS color."
@@ -360,6 +368,10 @@
           "type": "boolean",
           "description": "Hide or show the sound widget"
         },
+        "bluetoothWidget": {
+          "type": "boolean",
+          "description": "Hide or show the Bluetooth widget"
+        },
         "micWidget": {
           "type": "boolean",
           "description": "Hide or show the microphone widget"
@@ -476,6 +488,28 @@
         "customLocation": {
           "type": "string",
           "description": "Set your location. If empty, the location is determined by the location API"
+        },
+        "weatherApp": {
+          "type": "string",
+          "description": "The weather app to open when clicking on the widget"
+        }
+      }
+    },
+    "bluetoothWidgetOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "refreshFrequency": {
+          "type": "number",
+          "description": "The refresh frequency of this widget in milliseconds"
+        },
+        "showOnDisplay": {
+          "type": "string",
+          "description": "The displays on which the widget will be displayed. Add a list of indexes (for example: \"1,2\"). Leave blank to display the widget on every display"
+        },
+        "showIcon": {
+          "type": "boolean",
+          "description": "Show or hide Bluetooth device icons"
         }
       }
     },
@@ -791,6 +825,10 @@
         "showSeconds": {
           "type": "boolean",
           "description": "Display seconds"
+        },
+        "clockApp": {
+          "type": "string",
+          "description": "The clock app to open when clicking on the time"
         }
       }
     },

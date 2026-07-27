@@ -202,6 +202,10 @@
           "type": "string",
           "description": "The displays on which the process will be displayed. Add a list of indexes (for example: \"1,2\"). Leave blank to display the widget on every spaces"
         },
+        "displayForFocusedSpace": {
+          "type": "boolean",
+          "description": "Display processes for the currently focused space"
+        },
         "displayOnlyCurrent": {
           "type": "boolean",
           "description": "Insead of showing all processes of the current space, simple-bar will only show the current one"
@@ -602,6 +606,10 @@
           "type": "boolean",
           "description": "Enable the toggle of caffeinate mode on click"
         },
+        "disableCaffeinateInvertedBackground": {
+          "type": "boolean",
+          "description": "Disable the inverted battery background while caffeinate is active"
+        },
         "caffeinateOption": {
           "type": "string",
           "description": "The options to pass to caffeinate when toggling it"
@@ -705,10 +713,6 @@
         "showIcon": {
           "type": "boolean",
           "description": "Show or hide the widget icon"
-        },
-        "keyboardMaxLength": {
-          "type": "number",
-          "description": "Maximum number of characters to display for the keyboard layout (0 to show full name)"
         }
       }
     },
@@ -805,6 +809,10 @@
         "showIcon": {
           "type": "boolean",
           "description": "Show or hide the widget icon"
+        },
+        "keyboardMaxLength": {
+          "type": "number",
+          "description": "Maximum number of characters to display for the keyboard layout (0 to show full name)"
         }
       }
     },

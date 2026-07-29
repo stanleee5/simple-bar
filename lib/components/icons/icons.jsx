@@ -100,6 +100,7 @@ export const Desktop = React.lazy(() => import("./library/desktop.jsx"));
 export const DEVONthink3 = React.lazy(
   () => import("./library/de-v-o-nthink3.jsx"),
 );
+export const Dia = React.lazy(() => import("./library/dia.jsx"));
 export const Discord = React.lazy(() => import("./library/discord.jsx"));
 export const Docker = React.lazy(() => import("./library/docker.jsx"));
 export const Dollar = React.lazy(() => import("./library/dollar.jsx"));
@@ -128,6 +129,7 @@ export const Fog = React.lazy(() => import("./library/fog.jsx"));
 export const Folx = React.lazy(() => import("./library/folx.jsx"));
 export const FreeTube = React.lazy(() => import("./library/free-tube.jsx"));
 export const Gear = React.lazy(() => import("./library/gear.jsx"));
+export const Gemini = React.lazy(() => import("./library/gemini.jsx"));
 export const Ghostty = React.lazy(() => import("./library/ghostty.jsx"));
 export const GitHub = React.lazy(() => import("./library/git-hub.jsx"));
 export const GoodNotes = React.lazy(() => import("./library/good-notes.jsx"));
@@ -194,6 +196,9 @@ export const Moon = React.lazy(() => import("./library/moon.jsx"));
 export const Mpv = React.lazy(() => import("./library/mpv.jsx"));
 export const Music = React.lazy(() => import("./library/music.jsx"));
 export const N8n = React.lazy(() => import("./library/n8n.jsx"));
+export const NaverWhale = React.lazy(
+  () => import("./library/naver-whale.jsx"),
+);
 export const NeteaseMusic = React.lazy(
   () => import("./library/netease-music.jsx"),
 );
@@ -251,6 +256,7 @@ export const RemoteDesktop = React.lazy(
 export const Remove = React.lazy(() => import("./library/remove.jsx"));
 export const Replit = React.lazy(() => import("./library/replit.jsx"));
 export const Rider = React.lazy(() => import("./library/rider.jsx"));
+export const Ridibooks = React.lazy(() => import("./library/ridibooks.jsx"));
 export const RocketChat = React.lazy(() => import("./library/rocket-chat.jsx"));
 export const Roon = React.lazy(() => import("./library/roon.jsx"));
 export const RoyalTSX = React.lazy(() => import("./library/royal-tsx.jsx"));

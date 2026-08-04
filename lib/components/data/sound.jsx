@@ -13,6 +13,7 @@ export { soundStyles as styles } from "../../styles/components/data/sound";
 const { React } = Uebersicht;
 
 const DEFAULT_REFRESH_FREQUENCY = 20000;
+const PUSH_CACHE_TIMEOUT = 1000;
 
 /**
  * Sound widget component.
@@ -40,6 +41,11 @@ export const Widget = React.memo(() => {
   const { volume: _volume } = state || {};
   const [volume, setVolume] = React.useState(_volume && parseInt(_volume, 10));
   const [dragging, setDragging] = React.useState(false);
+  // Only a slider interaction may write the system volume back. Without this
+  // guard the poll below feeds its own reading into `volume`, which used to
+  // trigger the write effect and push a stale value onto the system, undoing
+  // any volume change made outside the bar (media keys, for instance).
+  const pendingWrite = React.useRef(false);
 
   /**
    * Reset the widget state.
@@ -54,9 +60,13 @@ export const Widget = React.memo(() => {
    */
   const getSound = React.useCallback(async () => {
     if (!visible) return;
+    // Cached only long enough to collapse the burst of reads that one pushed
+    // refresh triggers across the per-display bar instances. Caching for the
+    // whole refresh interval, as the other widgets do, would make a push
+    // return the previous poll's reading and defeat the point of pushing.
     const output = await Utils.cachedRun(
       `osascript -e 'set v to get volume settings' -e 'output volume of v & "," & output muted of v'`,
-      refresh,
+      Math.min(refresh, PUSH_CACHE_TIMEOUT),
     );
     const parts = Utils.cleanupOutput(output).split(",");
     setState({
@@ -73,7 +83,9 @@ export const Widget = React.memo(() => {
 
   // Update the sound settings when dragging ends.
   React.useEffect(() => {
-    if (!dragging) setSound(volume);
+    if (dragging || !pendingWrite.current) return;
+    pendingWrite.current = false;
+    setSound(volume);
   }, [dragging, volume]);
 
   // Update the volume state when the fetched volume changes.
@@ -103,6 +115,7 @@ export const Widget = React.memo(() => {
    */
   const onChange = (e) => {
     const value = parseInt(e.target.value, 10);
+    pendingWrite.current = true;
     setVolume(value);
   };
 
